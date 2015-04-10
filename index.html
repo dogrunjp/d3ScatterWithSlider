@@ -53,13 +53,20 @@
           fill: none;
           stroke: #292c33;
         }
+        p{
+          margin: 5px 15px;
+          font-size: 12px;
+        }
     </style>
 </head>
 <body>
 <div id="header">
   <h1>Meteor Chart</h1>
 </div>
-<div id="chart"></div>
+<div id="chart">
+  <p>* In this Sample, data resource is just random JSON something "Cosmic".
+    You can set proper keys and values of course.</p>
+</div>
 <div id="selector">
   <label for="zRange">Choose range of index</label>
   <input type="text" id="zrange" readonly>
@@ -113,7 +120,12 @@
         values: [ minZ,maxZ ],
         slide: function(event, ui){
           $("#zrange").val(ui.values[0] + " - " + ui.values[1]);
-          console.log(data.filter(function(d){return d.index >= ui.values[0] && d.index <= ui.values[1]}));
+          newdata = data.filter(function(d){return d.index >= ui.values[0] && d.index <= ui.values[1]});
+          xScale.domain([d3.min(newdata, xValue)-50, d3.max(newdata, xValue)+50]);
+          yScale.domain([d3.min(newdata, yValue)-10000, d3.max(newdata, yValue)+10000]);
+
+          drawChart(newdata);
+
         }
       });
       $("#zrange").val($("#slider").slider("values",0) + " - "+ $("#slider").slider("values",1));
@@ -146,11 +158,14 @@
 
       drawChart(data);
 
-      function drawChart(){
+      function drawChart(data1){
+        svg.select(".x.axis").transition().duration(900).call(xAxis);
+        svg.select(".y.axis").transition().duration(900).call(yAxis);
 
         //draw dots
-        svg.selectAll(".dot").data(data).enter().append("circle")
-            .attr("class", "dot")
+        svg.selectAll(".dot").data(data1).enter().append("circle");
+        svg.selectAll(".dot").data(data1).exit().remove();
+        svg.selectAll("circle").data(data1)
             .attr("r", 20)
             .attr("cx", xMap)
             .attr("cy", yMap)
@@ -159,8 +174,9 @@
               "stroke":c});
 
         //add images
-        svg.selectAll(".im").data(data).enter()
-          .append("svg:image")
+        svg.selectAll(".im").data(data1).enter().append("svg:image");
+        svg.selectAll(".im").data(data1).exit().remove();
+        svg.selectAll("image").data(data1)
             .attr("xlink:href",function(d){return d.image})
             .attr("x", xMap)
             .attr("y", yMap)
