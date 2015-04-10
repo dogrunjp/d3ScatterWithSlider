@@ -75,7 +75,9 @@
 <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
 <script src="js/jquery-ui.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="js/jquery.tipsy.js"></script>
 <link rel="stylesheet" href="css/jquery-ui.min.css">
+<link rel="stylesheet" href="css/tipsy.css">
 <script>
     var minX, maxX, minY, maxY, minZ, maxZ;
     var margin = {top: 40, right: 20, bottom: 30, left: 75},
@@ -159,7 +161,6 @@
       drawChart(data);
 
       function drawChart(data1){
-        console.log(data1);
         svg.select(".x.axis").transition().duration(500).call(xAxis);
         svg.select(".y.axis").transition().duration(500).call(yAxis);
 
@@ -172,7 +173,16 @@
             .attr("cy", yMap)
             .style({"fill": c = function(d){return d.color},
               "fill-opacity": 0.5,
-              "stroke":c});
+              "stroke":c})
+            .on("mouseover",function(){
+              d3.select(this).transition().duration(400).attr("r",22);
+            })
+            .on("mouseout", function(){
+              d3.select(this).transition().duration(100).attr("r",20);
+            })
+            .on("click", function(){
+              d3.select(this).transition().duration(100).attr("r",20);
+            });
 
         //add images
         svg.selectAll(".im").data(data1).enter().append("g").attr("class", "im").append("svg:image");
@@ -185,7 +195,17 @@
             .attr("height", 25)
             .attr("transform", "translate(-12,-12)");
 
-      }
+        $("svg circle").tipsy({
+          gravity: "w",
+          html: true,
+          title: function(){
+            var d= this.__data__, i = d.index;
+            return i + "!";
+          }
+        });
+
+
+      };
 
 
     });
