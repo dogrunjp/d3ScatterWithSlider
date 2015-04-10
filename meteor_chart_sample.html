@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Meteor Chart - Sample UI</title>
+    <style>
+        body {
+          margin: 0;
+          padding: 50px 0 60px 0;
+          font: 10px sans-serif;
+        }
+        #header{
+          postion: fixed !important;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 50px;
+          background-color: #292c33;
+          color: #a4b3d0;
+        }
+        #selector{
+          position: fixed !important;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 60px;
+          background-color:#292c33;
+          color: #a4b3d0;
+        }
+        #chart{
+          height: 100%;
+          min-height: 550px;
+          overflow: auto;
+        }
+        #slider{
+          width: 500px;
+          margin:10px 0px 0px 15px
+        }
+        h1,h2,label{
+          font-size: 14px;
+          font-weight:bold;
+          margin: 5px 15px;
+        }
+        input#zrange{
+          font-size: 14px;
+          border:0;
+          color:#a4b3d0;
+          background-color:#292c33
+        }
+        .axis path, .axis line{
+          fill: none;
+          stroke: #292c33;
+        }
+    </style>
+</head>
+<body>
+<div id="header">
+  <h1>Meteor Chart</h1>
+</div>
+<div id="chart"></div>
+<div id="selector">
+  <label for="zRange">Choose range of index</label>
+  <input type="text" id="zrange" readonly>
+  <div id="slider"></div>
+</div>
+<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="js/jquery-ui.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link rel="stylesheet" href="css/jquery-ui.min.css">
+<script>
+    var minX, maxX, minY, maxY, minZ, maxZ;
+    var margin = {top: 40, right: 20, bottom: 30, left: 75},
+    width = 960 - margin.left - margin.right,
+    height = 500 -margin.top - margin.bottom;
+
+    var xValue = function(d){return d.size},
+    xScale = d3.scale.linear().range([0, width]),
+    xMap = function(d){return xScale(xValue(d))},
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom"),
+    yValue = function(d){return d.distance},
+    yScale = d3.scale.linear().range([height, 0]),
+    yMap = function(d){return yScale(yValue(d))},
+    yAxis = d3.svg.axis().scale(yScale).orient("left"),
+    zValue = function(d){return d.index};
+
+    var svg = d3.select("#chart").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate("+ margin.left + "," + margin.top +")");
+
+
+
+
+    d3.json("data/meteor_test.json", function(error, data) {
+      data.forEach(function(d){
+        d.distance = +d.distance;
+        d.size = +d.size;
+        d.index = +d.index;
+      });
+      //minX = d3.min(data,xValue);
+      //maxX = d3.max(data,xValue);
+      minZ = d3.min(data,zValue);
+      maxZ = d3.max(data,zValue);
+
+      //set default slider value
+      $("#slider" ).slider({
+        range: true,
+        min: minZ,
+        max: maxZ,
+        values: [ minZ,maxZ ],
+        slide: function(event, ui){
+          $("#zrange").val(ui.values[0] + " - " + ui.values[1]);
+          console.log(data.filter(function(d){return d.index >= ui.values[0] && d.index <= ui.values[1]}));
+        }
+      });
+      $("#zrange").val($("#slider").slider("values",0) + " - "+ $("#slider").slider("values",1));
+
+
+      xScale.domain([d3.min(data, xValue)-50, d3.max(data, xValue)+50]);
+      yScale.domain([d3.min(data, yValue)-10000, d3.max(data, yValue)+10000]);
+
+      // draw axis
+      svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height +")")
+          .call(xAxis)
+        .append("text")
+          .attr("class", width)
+          .attr("x", width)
+          .attr("y", -8)
+          .style("text-anchor", "end")
+          .text("distance");
+
+      svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+        .append("text")
+          .attr("class", "label")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 10)
+          .style("text-anchor", "end")
+          .text("size");
+
+      drawChart(data);
+
+      function drawChart(){
+
+        //draw dots
+        svg.selectAll(".dot").data(data).enter().append("circle")
+            .attr("class", "dot")
+            .attr("r", 20)
+            .attr("cx", xMap)
+            .attr("cy", yMap)
+            .style({"fill": c = function(d){return d.color},
+              "fill-opacity": 0.5,
+              "stroke":c});
+
+        //add images
+        svg.selectAll(".im").data(data).enter()
+          .append("svg:image")
+            .attr("xlink:href",function(d){return d.image})
+            .attr("x", xMap)
+            .attr("y", yMap)
+            .attr("width", 25)
+            .attr("height", 25)
+            .attr("transform", "translate(-12,-12)");
+
+      }
+
+
+    });
+
+
+
+
+
+
+</script>
+</body>
+</html>
