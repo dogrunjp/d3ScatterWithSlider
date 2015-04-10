@@ -159,12 +159,13 @@
       drawChart(data);
 
       function drawChart(data1){
+        console.log(data1);
         svg.select(".x.axis").transition().duration(900).call(xAxis);
         svg.select(".y.axis").transition().duration(900).call(yAxis);
 
         //draw dots
-        svg.selectAll(".dot").data(data1).enter().append("circle");
-        svg.selectAll(".dot").data(data1).exit().remove();
+        svg.selectAll("circle").data(data1).enter().append("circle");
+        svg.selectAll("circle").data(data1).exit().remove();
         svg.selectAll("circle").data(data1)
             .attr("r", 20)
             .attr("cx", xMap)
@@ -174,7 +175,7 @@
               "stroke":c});
 
         //add images
-        svg.selectAll(".im").data(data1).enter().append("svg:image");
+        svg.selectAll(".im").data(data1).enter().append("g").attr("class", "im").append("svg:image");
         svg.selectAll(".im").data(data1).exit().remove();
         svg.selectAll("image").data(data1)
             .attr("xlink:href",function(d){return d.image})
