@@ -79,7 +79,7 @@
 <link rel="stylesheet" href="css/jquery-ui.min.css">
 <link rel="stylesheet" href="css/tipsy.css">
 <script>
-    var minX, maxX, minY, maxY, minZ, maxZ;
+    var minZ, maxZ;
     var margin = {top: 40, right: 20, bottom: 30, left: 75},
     width = 960 - margin.left - margin.right,
     height = 500 -margin.top - margin.bottom;
@@ -101,16 +101,12 @@
         .attr("transform", "translate("+ margin.left + "," + margin.top +")");
 
 
-
-
     d3.json("data/meteor_test.json", function(error, data) {
       data.forEach(function(d){
         d.distance = +d.distance;
         d.size = +d.size;
         d.index = +d.index;
       });
-      //minX = d3.min(data,xValue);
-      //maxX = d3.max(data,xValue);
       minZ = d3.min(data,zValue);
       maxZ = d3.max(data,zValue);
 
