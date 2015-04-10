@@ -160,8 +160,8 @@
 
       function drawChart(data1){
         console.log(data1);
-        svg.select(".x.axis").transition().duration(900).call(xAxis);
-        svg.select(".y.axis").transition().duration(900).call(yAxis);
+        svg.select(".x.axis").transition().duration(500).call(xAxis);
+        svg.select(".y.axis").transition().duration(500).call(yAxis);
 
         //draw dots
         svg.selectAll("circle").data(data1).enter().append("circle");
