@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Asteroid Taxonomy</title>
+    <style>
+        body {
+          margin: 0;
+          padding: 50px 0 60px 0;
+          font: 10px sans-serif;
+          background-color: #22252b;
+        }
+        #header{
+          postion: fixed !important;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 50px;
+          background-color: #292c33;
+          color: #a4b3d0;
+        }
+        #selector{
+          position: fixed !important;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 60px;
+          background-color:#292c33;
+          color: #a4b3d0;
+        }
+        #chart{
+          height: 100%;
+          min-height: 550px;
+          overflow: auto;
+          background-color: #22252b;
+        }
+        #slider{
+          width: 500px;
+          margin:10px 0px 0px 15px
+        }
+        h1,h2,label{
+          font-size: 14px;
+          font-weight:bold;
+          margin: 5px 15px;
+        }
+        input#zrange{
+          font-size: 14px;
+          border:0;
+          color:#a4b3d0;
+          background-color:#292c33
+        }
+        .axis path, .axis line{
+          fill: none;
+          stroke: #a4b3d0;
+        }
+        svg text{
+          color: #a4b3d0;
+          stroke: #a4b3d0;
+        }
+        p{
+          margin: 5px 15px;
+          font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<div id="header">
+  <h1>Asteroid Taxonomy</h1>
+</div>
+<div id="chart">
+</div>
+<div id="selector">
+  <label for="zRange">Choose 4 parameters you want to see.</label>
+  <input type="text" id="zrange" readonly>
+  <div id="slider"></div>
+</div>
+<script src="js/d3.min.js"></script>
+<script src="js/jquery.js"></script>
+<script src="js/jquery.tipsy.js"></script>
+<script src="js/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="css/jquery-ui.min.css">
+<link rel="stylesheet" href="css/tipsy.css">
+<script>
+    var parameters = [];
+    var minZ, maxZ;
+    var margin = {top: 40, right: 20, bottom: 30, left: 75},
+    width = 800 - margin.left - margin.right,
+    height = 450 -margin.top - margin.bottom;
+
+    var xValue = function(d){return d.key_1},
+    xScale = d3.scale.linear().range([0, width]),
+    xMap = function(d){return xScale(xValue(d))},
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom"),
+    yValue = function(d){return d.key_2},
+    yScale = d3.scale.linear().range([height, 0]),
+    yMap = function(d){return yScale(yValue(d))},
+    yAxis = d3.svg.axis().scale(yScale).orient("left"),
+    zValue = function(d){return d.index},
+    zScale = d3.scale.linear().range([1, 10]),
+    //color = d3.scale.category10();
+    color = d3.scale.linear().domain([10, 300]).range(["red","orange"]);
+    //
+    //var lists = ["key_1","key_2","key_3", "key_4","key_5"];
+    d3.json("data/meteor_test_0.json", function(error, data){
+      
+
+
+    })
+
+
+
+
+    function checkSelection(){
+
+    };
+
+    function setupChart(){
+      var svg = d3.select("#chart").append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+          .attr("transform", "translate("+ margin.left + "," + margin.top +")");
+
+
+
+    };
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

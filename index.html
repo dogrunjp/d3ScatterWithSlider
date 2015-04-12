@@ -56,6 +56,7 @@
           stroke: #a4b3d0;
         }
         svg text{
+          font-size: 12px;
           color: #a4b3d0;
           stroke: #a4b3d0;
         }
@@ -97,8 +98,8 @@
     yAxis = d3.svg.axis().scale(yScale).orient("left"),
     zValue = function(d){return d.index},
     zScale = d3.scale.linear().range([1, 10]),
-    color = d3.scale.category10();
-
+    //color = d3.scale.category10();
+    color = d3.scale.linear().domain([10, 300]).range(["red","orange"]);
     //
     //var lists = ["key_1","key_2","key_3", "key_4","key_5"];
 
@@ -132,7 +133,7 @@
           xScale.domain([d3.min(newdata, xValue), xma = d3.max(newdata, xValue)]);
           yScale.domain([d3.min(newdata, yValue), d3.max(newdata, yValue)]);
           zScale.domain([d3.min(newdata, zValue), d3.max(newdata, zValue)]);
-
+          color.domain
           drawChart(newdata);
 
         }
@@ -144,7 +145,6 @@
       yScale.domain([d3.min(data, yValue), d3.max(data, yValue)]);
       zScale.domain([d3.min(data, zValue), d3.max(data, zValue)]);
 
-      // draw axis
       svg.append("g")
           .attr("class", "x axis")
           .attr("transform", "translate(0," + height +")")
@@ -154,7 +154,7 @@
           .attr("x", width)
           .attr("y", -8)
           .style("text-anchor", "end")
-          .text("distance");
+          .text("some value e.g. 'distance'");
 
       svg.append("g")
           .attr("class", "y axis")
@@ -164,7 +164,7 @@
           .attr("transform", "rotate(-90)")
           .attr("y", 10)
           .style("text-anchor", "end")
-          .text("size");
+          .text("some value e.g 'size'");
 
 
       drawChart(data);
@@ -188,7 +188,7 @@
               d3.select(this).transition().duration(400).attr({"r": function(d){return  zScale(2 * d.key_3)}});
             })
             .on("mouseout", function(){
-              d3.select(this).transition().duration(100).attr({"r": c = function(d){return  zScale(d.key_3)}});
+              d3.select(this).transition().duration(100).attr({"r": function(d){return  zScale(d.key_3)}});
             })
             .on("click", function(){
               d3.select(this).transition().duration(100).attr({"r": function(d){return  zScale(d.key_3)}});
