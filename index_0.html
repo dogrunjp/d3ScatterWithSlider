@@ -2,13 +2,12 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Asteroid Taxonomy</title>
+    <title>Meteor Chart - Sample UI</title>
     <style>
         body {
           margin: 0;
           padding: 50px 0 60px 0;
           font: 10px sans-serif;
-          background-color: #22252b;
         }
         #header{
           postion: fixed !important;
@@ -34,7 +33,6 @@
           height: 100%;
           min-height: 550px;
           overflow: auto;
-          background-color: #22252b;
         }
         #slider{
           width: 500px;
@@ -53,11 +51,7 @@
         }
         .axis path, .axis line{
           fill: none;
-          stroke: #a4b3d0;
-        }
-        svg text{
-          color: #a4b3d0;
-          stroke: #a4b3d0;
+          stroke: #292c33;
         }
         p{
           margin: 5px 15px;
@@ -67,9 +61,12 @@
 </head>
 <body>
 <div id="header">
-  <h1>Asteroid Taxonomy</h1>
+  <h1>Meteor Chart</h1>
 </div>
-<div id="chart"></div>
+<div id="chart">
+  <p>* In this Sample, data resource is just random JSON something "Cosmic".
+    You can set proper keys and values of course.</p>
+</div>
 <div id="selector">
   <label for="zRange">Choose range of index</label>
   <input type="text" id="zrange" readonly>
@@ -84,23 +81,18 @@
 <script>
     var minZ, maxZ;
     var margin = {top: 40, right: 20, bottom: 30, left: 75},
-    width = 800 - margin.left - margin.right,
-    height = 450 -margin.top - margin.bottom;
+    width = 960 - margin.left - margin.right,
+    height = 500 -margin.top - margin.bottom;
 
-    var xValue = function(d){return d.key_1},
+    var xValue = function(d){return d.size},
     xScale = d3.scale.linear().range([0, width]),
     xMap = function(d){return xScale(xValue(d))},
     xAxis = d3.svg.axis().scale(xScale).orient("bottom"),
-    yValue = function(d){return d.key_2},
+    yValue = function(d){return d.distance},
     yScale = d3.scale.linear().range([height, 0]),
     yMap = function(d){return yScale(yValue(d))},
     yAxis = d3.svg.axis().scale(yScale).orient("left"),
-    zValue = function(d){return d.index},
-    zScale = d3.scale.linear().range([1, 10]),
-    color = d3.scale.category10();
-
-    //
-    //var lists = ["key_1","key_2","key_3", "key_4","key_5"];
+    zValue = function(d){return d.index};
 
     var svg = d3.select("#chart").append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -109,13 +101,11 @@
         .attr("transform", "translate("+ margin.left + "," + margin.top +")");
 
 
-    d3.json("data/meteor_test_0.json", function(error, data) {
+    d3.json("data/meteor_test.json", function(error, data) {
       data.forEach(function(d){
         d.distance = +d.distance;
-        d.key_1 = +d.key_1;
-        d.key_2 = +d.key_2;
-        d.key_3 = +d.key_3;
-        d.key_4 = +d.key_4;
+        d.size = +d.size;
+        d.index = +d.index;
       });
       minZ = d3.min(data,zValue);
       maxZ = d3.max(data,zValue);
@@ -129,9 +119,8 @@
         slide: function(event, ui){
           $("#zrange").val(ui.values[0] + " - " + ui.values[1]);
           newdata = data.filter(function(d){return d.index >= ui.values[0] && d.index <= ui.values[1]});
-          xScale.domain([d3.min(newdata, xValue), xma = d3.max(newdata, xValue)]);
-          yScale.domain([d3.min(newdata, yValue), d3.max(newdata, yValue)]);
-          zScale.domain([d3.min(newdata, zValue), d3.max(newdata, zValue)]);
+          xScale.domain([d3.min(newdata, xValue)-50, d3.max(newdata, xValue)+50]);
+          yScale.domain([d3.min(newdata, yValue)-10000, d3.max(newdata, yValue)+10000]);
 
           drawChart(newdata);
 
@@ -140,9 +129,8 @@
       $("#zrange").val($("#slider").slider("values",0) + " - "+ $("#slider").slider("values",1));
 
 
-      xScale.domain([d3.min(data, xValue), d3.max(data, xValue)]);
-      yScale.domain([d3.min(data, yValue), d3.max(data, yValue)]);
-      zScale.domain([d3.min(data, zValue), d3.max(data, zValue)]);
+      xScale.domain([d3.min(data, xValue)-50, d3.max(data, xValue)+50]);
+      yScale.domain([d3.min(data, yValue)-10000, d3.max(data, yValue)+10000]);
 
       // draw axis
       svg.append("g")
@@ -166,11 +154,9 @@
           .style("text-anchor", "end")
           .text("size");
 
-
       drawChart(data);
 
       function drawChart(data1){
-
         svg.select(".x.axis").transition().duration(500).call(xAxis);
         svg.select(".y.axis").transition().duration(500).call(yAxis);
 
@@ -178,27 +164,38 @@
         svg.selectAll("circle").data(data1).enter().append("circle");
         svg.selectAll("circle").data(data1).exit().remove();
         svg.selectAll("circle").data(data1)
-            .attr("r", function(d){return zScale(d.key_3)})
+            .attr("r", 20)
             .attr("cx", xMap)
             .attr("cy", yMap)
-            .style({"fill": c = function(d){return color(d.key_10)},
-              "fill-opacity":0.5,
+            .style({"fill": c = function(d){return d.color},
+              "fill-opacity": 0.5,
               "stroke":c})
             .on("mouseover",function(){
-              d3.select(this).transition().duration(400).attr({"r": function(d){return  zScale(2 * d.key_3)}});
+              d3.select(this).transition().duration(400).attr("r",22);
             })
             .on("mouseout", function(){
-              d3.select(this).transition().duration(100).attr({"r": c = function(d){return  zScale(d.key_3)}});
+              d3.select(this).transition().duration(100).attr("r",20);
             })
             .on("click", function(){
-              d3.select(this).transition().duration(100).attr({"r": function(d){return  zScale(d.key_3)}});
+              d3.select(this).transition().duration(100).attr("r",20);
             });
+
+        //add images
+        svg.selectAll(".im").data(data1).enter().append("g").attr("class", "im").append("svg:image");
+        svg.selectAll(".im").data(data1).exit().remove();
+        svg.selectAll("image").data(data1)
+            .attr("xlink:href",function(d){return d.image})
+            .attr("x", xMap)
+            .attr("y", yMap)
+            .attr("width", 25)
+            .attr("height", 25)
+            .attr("transform", "translate(-12,-12)");
 
         $("svg circle").tipsy({
           gravity: "w",
           html: true,
           title: function(){
-            var d= this.__data__, i = d.id;
+            var d= this.__data__, i = d.index;
             return i + "!";
           }
         });

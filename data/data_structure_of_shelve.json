@@ -1,0 +1,17 @@
+{u'Name': u'Ceres',
+ u'Number': u'(1)',
+ u'ProvisionalDesignation': '',
+ 'data': [
+   {'available': u'Vis+NIR',
+   'files': [{'type': 'tabulated data file','url': 'data/spex/sp41/a000001.sp41.txt'},{'type': 'graph of data', 'url': 'data/spex/sp41/sp41_plot.pdf'}],
+    'reference': {'text': u'sp[041]', 'url': 'minus.html#unpublished'}},
+   {'available': u'Vis',
+    'files': [{'type': 'tabulated data file','url': 'data/smass/smass2/a000001.2.txt'}],
+    'reference': {'text': u'ref[02]', 'url': 'smass.html#ref002'}},
+   {'available': u'Vis',
+    'files': [{'type': 'tabulated data file','url': 'data/smass/smass2/a000001.spfit.2.txt'}],
+    'reference': {'text': u'ref[02]', 'url': 'smass.html#ref002'}},
+   {'available': u'NIR',
+    'files': [{'type': 'tabulated data file','url': 'data/smass/smassir/a000001.3.txt'}],
+    'reference': {'text': u'ref[03]', 'url': 'smass.html#ref003'}}],
+ 'ndata': 4}
