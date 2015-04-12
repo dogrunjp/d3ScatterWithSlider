@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Asteroid Taxonomy</title>
+    <title>Matrix Plot</title>
     <style>
         body {
           margin: 0;
@@ -40,6 +40,9 @@
           width: 500px;
           margin:10px 0px 0px 15px
         }
+        #checkbox{
+          padding: 5px 5px;
+        }
         h1,h2,label{
           font-size: 14px;
           font-weight:bold;
@@ -50,6 +53,9 @@
           border:0;
           color:#a4b3d0;
           background-color:#292c33
+        }
+        input[type="checkbox"]{
+          margin-left: 10px;
         }
         .axis path, .axis line{
           fill: none;
@@ -67,14 +73,13 @@
 </head>
 <body>
 <div id="header">
-  <h1>Asteroid Taxonomy</h1>
+  <h1>Matrix Plot</h1>
 </div>
 <div id="chart">
 </div>
 <div id="selector">
   <label for="zRange">Choose 4 parameters you want to see.</label>
-  <input type="text" id="zrange" readonly>
-  <div id="slider"></div>
+  <div id="checkbox"></div>
 </div>
 <script src="js/d3.min.js"></script>
 <script src="js/jquery.js"></script>
@@ -83,46 +88,70 @@
 <link rel="stylesheet" href="css/jquery-ui.min.css">
 <link rel="stylesheet" href="css/tipsy.css">
 <script>
-    var parameters = [];
-    var minZ, maxZ;
     var margin = {top: 40, right: 20, bottom: 30, left: 75},
-    width = 800 - margin.left - margin.right,
-    height = 450 -margin.top - margin.bottom;
+    width = 960, size = 150, padding = 20;
+
+    var parameters = [], asteroids;
+    var minZ, maxZ;
+
 
     var xValue = function(d){return d.key_1},
-    xScale = d3.scale.linear().range([0, width]),
-    xMap = function(d){return xScale(xValue(d))},
-    xAxis = d3.svg.axis().scale(xScale).orient("bottom"),
-    yValue = function(d){return d.key_2},
-    yScale = d3.scale.linear().range([height, 0]),
-    yMap = function(d){return yScale(yValue(d))},
-    yAxis = d3.svg.axis().scale(yScale).orient("left"),
-    zValue = function(d){return d.index},
-    zScale = d3.scale.linear().range([1, 10]),
-    //color = d3.scale.category10();
-    color = d3.scale.linear().domain([10, 300]).range(["red","orange"]);
+    xScale = d3.scale.linear().range([padding / 2, size - padding / 2]),
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom").tick(5),
+    yScale = d3.scale.linear().range([size - padding / 2, padding / 2]]),
+    yAxis = d3.svg.axis().scale(yScale).orient("left").tick(5),
+    //color = d3.scale.linear().domain([10, 300]).range(["red","orange"]);
+    color = d3.scale.category10();
     //
     //var lists = ["key_1","key_2","key_3", "key_4","key_5"];
-    d3.json("data/meteor_test_0.json", function(error, data){
-      
+    d3.json("data/sample.json", function(error, data){
+      asteroids = data;
+      parameters = d3.keys(asteroids[0])
+          .filter(function(key){
+            return key !== 'id' && key !=='index' && key !=='guid' && key !== 'isFoo' && key !== 'data' && key !== 'picture';
+          })
+
+      $.each(parameters, function(i,d){
+        $("#checkbox").append("<input type='checkbox' class='sl' id='selection' value='" + d +"'/>" + d);
+      });
+      $("#checkbox").change(function(e){
+        //k = e.target.value;
+        var p = $("[class='sl']:checked").map(function(){
+          return $(this).val();
+        });
+        checkSelection(p)
+
+      })
 
 
-    })
+    });
 
 
 
-
-    function checkSelection(){
+    function checkSelection(p){
+      if(p.length == 4){
+        setupChart(p);
+      }
 
     };
 
-    function setupChart(){
-      var svg = d3.select("#chart").append("svg")
-          .attr("width", width + margin.left + margin.right)
-          .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-          .attr("transform", "translate("+ margin.left + "," + margin.top +")");
+    function setupChart(k){
+      var k1=k[0], k2=k[1], k3=k[2], k4=k[3],
+      n = k.length;
+      console.log(n);
 
+      //console.log(asteroids[0][k1])
+      var svg = d3.select("#chart").append("svg")
+          .attr("width", size * n + padding)
+          .attr("height", size * n * padding)
+        .append("g")
+          .attr("transform", "translate("+ padding + "," + padding / 2 +")");
+
+      svg.selectAll(".x.axis")
+          .data()
+        .ente().append("g")
+          .attr("class", "x axis")
+          .attr("transform", function(d, i) { return "translate(" + (n - i - 1) * size + ",0)";
 
 
     };
