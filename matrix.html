@@ -6,7 +6,7 @@
     <style>
         body {
           margin: 0;
-          padding: 50px 0 60px 0;
+          padding: 35px 0 0px 0;
           font: 10px sans-serif;
           background-color: #22252b;
         }
@@ -16,18 +16,13 @@
           top: 0;
           left: 0;
           width: 100%;
-          height: 50px;
+          height: 35px;
           background-color: #292c33;
           color: #a4b3d0;
         }
         #selector{
-          position: fixed !important;
-          position: absolute;
-          bottom: 0;
-          left: 0;
           width: 100%;
           height: 60px;
-          background-color:#292c33;
           color: #a4b3d0;
         }
         #chart{
@@ -46,7 +41,7 @@
         h1,h2,label{
           font-size: 14px;
           font-weight:bold;
-          margin: 5px 15px;
+          margin: 10px 15px 5px;
         }
         input#zrange{
           font-size: 14px;
@@ -54,8 +49,9 @@
           color:#a4b3d0;
           background-color:#292c33
         }
-        input[type="checkbox"]{
-          margin-left: 10px;
+
+        label{
+          margin-left: 8px;
         }
         .axis path, .axis line{
           fill: none;
@@ -69,97 +65,156 @@
           margin: 5px 15px;
           font-size: 12px;
         }
+        svg rect.frame{
+          fill: #000;
+          fill-opacity: 0.75;
+        }
     </style>
 </head>
 <body>
 <div id="header">
   <h1>Matrix Plot</h1>
 </div>
-<div id="chart">
-</div>
 <div id="selector">
-  <label for="zRange">Choose 4 parameters you want to see.</label>
+  <h2>Select 4 parameters</h2>
   <div id="checkbox"></div>
 </div>
+<div id="chart">
+</div>
+
 <script src="js/d3.min.js"></script>
 <script src="js/jquery.js"></script>
-<script src="js/jquery.tipsy.js"></script>
-<script src="js/jquery-ui.min.js"></script>
-<link rel="stylesheet" href="css/jquery-ui.min.css">
-<link rel="stylesheet" href="css/tipsy.css">
 <script>
     var margin = {top: 40, right: 20, bottom: 30, left: 75},
-    width = 960, size = 150, padding = 20;
+    width = 960, size = 150, padding = 30;
 
-    var parameters = [], asteroids;
-    var minZ, maxZ;
+    var parameters = [], sample, domainByParameter = {}, minZ, maxZ;
 
 
     var xValue = function(d){return d.key_1},
-    xScale = d3.scale.linear().range([padding / 2, size - padding / 2]),
-    xAxis = d3.svg.axis().scale(xScale).orient("bottom").tick(5),
-    yScale = d3.scale.linear().range([size - padding / 2, padding / 2]]),
-    yAxis = d3.svg.axis().scale(yScale).orient("left").tick(5),
+    x = d3.scale.linear().range([padding / 2, size - padding / 2]),
+    xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(5),
+    y = d3.scale.linear().range([size - padding / 2, padding / 2]),
+    yAxis = d3.svg.axis().scale(y).orient("left").ticks(5),
     //color = d3.scale.linear().domain([10, 300]).range(["red","orange"]);
     color = d3.scale.category10();
     //
-    //var lists = ["key_1","key_2","key_3", "key_4","key_5"];
-    d3.json("data/sample.json", function(error, data){
-      asteroids = data;
-      parameters = d3.keys(asteroids[0])
+    //var lists = ["key_1","key_2","key_3", "key_4","key_5",,,,];
+    d3.json("data/sample_data.json", function(error, data){
+      //sample key:value型のオブジェクト
+      sample = data;
+      parameters = d3.keys(sample[0])
           .filter(function(key){
-            return key !== 'id' && key !=='index' && key !=='guid' && key !== 'isFoo' && key !== 'data' && key !== 'picture';
-          })
+            //// 利用するデータの項目を正規表現でフィルターしています。
+            ////　このサンプルでは"key_"＋数字のプロパティのみ利用することにします。
+            return key.match(/key_\d/);
+          });
 
       $.each(parameters, function(i,d){
-        $("#checkbox").append("<input type='checkbox' class='sl' id='selection' value='" + d +"'/>" + d);
+        $("#checkbox").append("<label><input type='checkbox' class='sl' id='selection' value='" + d +"'/>" + d + "</label>");
       });
+
+      //チェックボックス選択をフック
       $("#checkbox").change(function(e){
         //k = e.target.value;
-        var p = $("[class='sl']:checked").map(function(){
+        parameters = $("[class='sl']:checked").map(function(){
           return $(this).val();
         });
-        checkSelection(p)
-
+        checkSelection(parameters)
       })
-
 
     });
 
-
-
-    function checkSelection(p){
-      if(p.length == 4){
-        setupChart(p);
+    //checkboxが４つ選択されたらチャートの描画を開始する
+    function checkSelection(ps){
+      if(ps.length == 4){
+        setupChart();
       }
-
     };
 
-    function setupChart(k){
-      var k1=k[0], k2=k[1], k3=k[2], k4=k[3],
-      n = k.length;
-      console.log(n);
+    //
+    function setupChart(ps){
+      //psは選択されたパラメータの配列
+      var n = parameters.length;
+      //Array風objectをArrayに変換
+      parameters = Array.prototype.slice.apply(parameters);
+      parameters.forEach(function(p) {
+        domainByParameter[p] = d3.extent(sample, function(d){return d[p]})
+      });
 
-      //console.log(asteroids[0][k1])
+      xAxis.tickSize(size * n);
+      yAxis.tickSize(-size * n);
+
+
       var svg = d3.select("#chart").append("svg")
           .attr("width", size * n + padding)
-          .attr("height", size * n * padding)
+          .attr("height", size * n  + padding)
         .append("g")
           .attr("transform", "translate("+ padding + "," + padding / 2 +")");
 
+      // グループを追加しxAxisをcall
       svg.selectAll(".x.axis")
-          .data()
-        .ente().append("g")
+          .data(parameters)
+        .enter().append("g")
           .attr("class", "x axis")
-          .attr("transform", function(d, i) { return "translate(" + (n - i - 1) * size + ",0)";
+          .attr("transform", function(d, i) { return "translate(" + (n - i - 1) * size + ",0)"})
+          .each(function(d){x.domain(domainByParameter[d]); d3.select(this).call(xAxis)});
+
+      //グループを作成しyAxisをcall
+      svg.selectAll(".y.axis")
+          .data(parameters)
+        .enter().append("g")
+          .attr("class", "y axis")
+          .attr("transform", function(d, i){ return "translate(0," + i * size + ")"; })
+          .each(function(d){x.domain(domainByParameter[d]); d3.select(this).call(yAxis)});
+
+
+      //cellグループを作りチャートをプロット。プロットはplot()を呼ぶ。
+      var cell = svg.selectAll(".cell")
+          .data(cross(parameters, parameters))
+        .enter().append("g")
+          .attr("class", "cell")
+          .attr("transform", function(d){return "translate(" + (n - d.i - 1) * size + "," + d.j * size + ")";})
+          .each(plot);
+
+      cell.filter(function(d) { return d.i === d.j; }).append("text")
+          .attr("x", padding)
+          .attr("y", padding)
+          .attr("dy", ".71em")
+          .text(function(d) { return d.x; })
+          .attr("font-size", 12);
+
+      function plot(p){
+        var cell = d3.select(this);
+
+        x.domain(domainByParameter[p.x]);
+        y.domain(domainByParameter[p.y]);
+
+        cell.append("rect")
+            .attr("class", "frame")
+            .attr("x", padding / 2)
+            .attr("y", padding / 2)
+            .attr("width", size - padding)
+            .attr("height", size - padding);
+
+        cell.selectAll("circle")
+            .data(sample)
+          .enter().append("circle")
+            .attr("cx", function(d){return x(d[p.x]);})
+            .attr("cy", function(d){return y(d[p.y]);})
+            .attr("r", 3)
+            .style("fill", function(d){return color(d.isFoo)});
+
+      }
+
+      function cross(a, b) {
+        var c = [], n = a.length, m = b.length, i, j;
+        for (i = -1; ++i < n;) for (j = -1; ++j < m;) c.push({x: a[i], i: i, y: b[j], j: j});
+        return c;
+      }
 
 
     };
-
-
-
-
-
 
 
 
